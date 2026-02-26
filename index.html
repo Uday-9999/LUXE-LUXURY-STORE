@@ -9,8 +9,7 @@
 </head>
 <body>
 
-<!-- Custom Cursor -->
-<div class="cursor" id="cursor"></div>
+div class="cursor" id="cursor"></div>
 <div class="cursor-follower" id="cursorFollower"></div>
 
 <!-- Search Overlay -->
@@ -62,6 +61,7 @@
     <li><a href="#">Sale</a></li>
   </ul>
   <div class="nav-actions">
+    <button class="btn-signin-nav" onclick="openLoginModal()">Sign In</button>
     <button class="btn-icon" onclick="openSearch()" title="Search">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </button>
@@ -217,8 +217,130 @@
   </div>
 </footer>
 
+<!-- ==================== LOGIN MODAL ==================== -->
+<div class="login-modal-overlay" id="loginOverlay">
+  <div class="login-modal" id="loginModal">
+    <div class="modal-gold-bar"></div>
+    <div class="modal-inner">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+
+      <span class="modal-logo">Luxe</span>
+      <h2 class="modal-title">Welcome Back</h2>
+      <p class="modal-sub">Sign in to access your account, wishlist & orders. New here? <a href="#">Create an account</a></p>
+
+      <!-- Social login -->
+      <div class="lm-socials">
+        <button class="lm-social" onclick="socialSignIn('Google')">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google
+        </button>
+        <button class="lm-social" onclick="socialSignIn('Apple')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </button>
+      </div>
+
+      <div class="lm-divider">or continue with</div>
+
+      <!-- Form content -->
+      <div class="lm-form-content" id="lmFormContent">
+
+        <!-- Identifier toggle -->
+        <div class="id-toggle">
+          <button type="button" class="id-toggle-btn active" id="lmToggleEmail" onclick="lmSwitchMode('email')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+            Email
+          </button>
+          <button type="button" class="id-toggle-btn" id="lmTogglePhone" onclick="lmSwitchMode('phone')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a2 2 0 011.99-1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.91 14.91a16 16 0 006.63 6.63l.27-.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            Phone
+          </button>
+        </div>
+
+        <form id="lmForm" novalidate onsubmit="lmSubmit(event)">
+
+          <!-- Identifier field -->
+          <div class="lm-group">
+            <label class="lm-label" id="lmIdentLabel">Email Address</label>
+            <div class="lm-input-wrap" id="lmIdentWrap">
+              <span class="lm-icon" id="lmIdentIcon">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+              </span>
+              <span class="lm-phone-code" id="lmPhoneCode">+91</span>
+              <input class="lm-input" type="email" id="lmIdent" placeholder="you@example.com" autocomplete="email" oninput="lmValidateIdent()">
+            </div>
+            <div class="lm-msg" id="lmIdentMsg"></div>
+          </div>
+
+          <!-- Password field -->
+          <div class="lm-group">
+            <label class="lm-label">Password</label>
+            <div class="lm-input-wrap">
+              <span class="lm-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </span>
+              <input class="lm-input" type="password" id="lmPassword" placeholder="Your password" autocomplete="current-password" oninput="lmValidatePw()">
+              <button type="button" class="lm-eye" id="lmEyeBtn" onclick="lmToggleEye()">
+                <svg id="lmEyeIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+
+            <!-- Strength bar -->
+            <div class="pw-bar-wrap" id="lmBarWrap">
+              <div class="pw-bar-track"><div class="pw-bar-fill" id="lmBarFill"></div></div>
+              <div class="pw-bar-label" id="lmBarLabel"></div>
+            </div>
+
+            <!-- Requirements checklist -->
+            <div class="pw-reqs" id="lmReqs">
+              <div class="req" id="lmR-upper"><div class="req-circle" id="lmC-upper"></div>Uppercase (A–Z)</div>
+              <div class="req" id="lmR-lower"><div class="req-circle" id="lmC-lower"></div>Lowercase (a–z)</div>
+              <div class="req" id="lmR-digit"><div class="req-circle" id="lmC-digit"></div>Digit (0–9)</div>
+              <div class="req" id="lmR-special"><div class="req-circle" id="lmC-special"></div>Special (!@#$…)</div>
+              <div class="req" id="lmR-length"><div class="req-circle" id="lmC-length"></div>Min 8 chars</div>
+              <div class="req" id="lmR-safe"><div class="req-circle" id="lmC-safe"></div>Not common</div>
+            </div>
+
+            <div class="lm-msg" id="lmPwMsg"></div>
+          </div>
+
+          <!-- Options -->
+          <div class="lm-options">
+            <label class="lm-remember">
+              <input type="checkbox" id="lmRemember">
+              <div class="lm-checkbox"></div>
+              <span class="lm-remember-label">Keep me signed in</span>
+            </label>
+            <a href="#" class="lm-forgot">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="lm-submit" id="lmSubmitBtn">
+            <span class="lm-btn-text">Sign In to Luxe</span>
+            <span class="lm-btn-loader"><div class="lm-spinner"></div></span>
+          </button>
+
+        </form>
+
+        <div class="lm-signup">
+          New to Luxe? <a href="#">Create your account →</a>
+        </div>
+      </div><!-- /lm-form-content -->
+
+      <!-- Success state -->
+      <div class="lm-success" id="lmSuccess">
+        <div class="lm-success-ring">✦</div>
+        <div class="lm-success-title">Welcome Back</div>
+        <p class="lm-success-msg">You're signed in. Enjoy shopping at Luxe.</p>
+      </div>
+
+    </div><!-- /modal-inner -->
+  </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
+
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>

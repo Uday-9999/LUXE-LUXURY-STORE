@@ -1,0 +1,189 @@
+function openLoginModal() {
+  document.getElementById('loginOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // reset after close
+  setTimeout(() => {
+    document.getElementById('lmForm').reset();
+    document.getElementById('lmSuccess').classList.remove('show');
+    document.getElementById('lmFormContent').classList.remove('hide');
+    document.getElementById('lmBarWrap').style.display = 'none';
+    document.getElementById('lmReqs').classList.remove('show');
+    ['lmIdent','lmPassword'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('valid','invalid');
+    });
+    ['lmIdentMsg','lmPwMsg'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) { el.textContent=''; el.className='lm-msg'; }
+    });
+    lmSwitchMode('email');
+  }, 500);
+}
+
+// Close on overlay click
+document.getElementById('loginOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeLoginModal();
+});
+
+// ── Mode switch ──
+let lmMode = 'email';
+function lmSwitchMode(m) {
+  lmMode = m;
+  document.getElementById('lmToggleEmail').classList.toggle('active', m==='email');
+  document.getElementById('lmTogglePhone').classList.toggle('active', m==='phone');
+  const wrap = document.getElementById('lmIdentWrap');
+  const input = document.getElementById('lmIdent');
+  const label = document.getElementById('lmIdentLabel');
+  const icon  = document.getElementById('lmIdentIcon');
+
+  wrap.classList.toggle('phone-mode', m==='phone');
+  if(m==='email') {
+    input.type='email'; input.placeholder='you@example.com'; input.autocomplete='email';
+    label.textContent='Email Address';
+    icon.innerHTML=`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>`;
+    input.classList.remove('phone-pad');
+  } else {
+    input.type='tel'; input.placeholder='98765 43210'; input.autocomplete='tel';
+    label.textContent='Phone Number';
+    input.classList.add('phone-pad');
+  }
+  input.value=''; lmClearMsg('lmIdentMsg'); input.classList.remove('valid','invalid');
+}
+
+// ── Identifier validation ──
+function lmValidateIdent() {
+  const input = document.getElementById('lmIdent');
+  const val = input.value.trim();
+  const msg = document.getElementById('lmIdentMsg');
+  if(!val){ lmClearMsg('lmIdentMsg'); input.classList.remove('valid','invalid'); return false; }
+  let ok;
+  if(lmMode==='email'){
+    ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    lmSetField(input, msg, ok, ok?'Valid email ✓':'Enter a valid email address');
+  } else {
+    const d = val.replace(/\D/g,'');
+    ok = d.length>=10 && d.length<=13;
+    lmSetField(input, msg, ok, ok?'Valid number ✓':'Enter a valid 10-digit number');
+  }
+  return ok;
+}
+
+// ── Password validation ──
+const LM_COMMON = ['password','123456','qwerty','abc123','letmein','welcome','monkey','dragon','luxe1234'];
+const lmRules = {
+  upper:   v => /[A-Z]/.test(v),
+  lower:   v => /[a-z]/.test(v),
+  digit:   v => /[0-9]/.test(v),
+  special: v => /[!@#$%^&*()\-_=+\[\]{};:'",.<>?\/\\|`~]/.test(v),
+  length:  v => v.length >= 8,
+  safe:    v => !LM_COMMON.includes(v.toLowerCase()),
+};
+
+function lmValidatePw() {
+  const input = document.getElementById('lmPassword');
+  const val = input.value;
+  const barWrap = document.getElementById('lmBarWrap');
+  const fill = document.getElementById('lmBarFill');
+  const lbl  = document.getElementById('lmBarLabel');
+  const reqs = document.getElementById('lmReqs');
+  const msg  = document.getElementById('lmPwMsg');
+
+  if(!val){
+    barWrap.style.display='none';
+    reqs.classList.remove('show');
+    lmClearMsg('lmPwMsg');
+    input.classList.remove('valid','invalid');
+    return false;
+  }
+
+  barWrap.style.display='block';
+  reqs.classList.add('show');
+
+  let met=0;
+  Object.entries(lmRules).forEach(([key,fn])=>{
+    const pass = fn(val);
+    if(pass) met++;
+    const row = document.getElementById(`lmR-${key}`);
+    const dot = document.getElementById(`lmC-${key}`);
+    if(pass){ row.classList.add('met'); dot.textContent='✓'; }
+    else    { row.classList.remove('met'); dot.textContent=''; }
+  });
+
+  const levels = [
+    {w:'15%', bg:'#e05555', txt:'Weak'},
+    {w:'30%', bg:'#e08355', txt:'Weak'},
+    {w:'50%', bg:'#e0b855', txt:'Fair'},
+    {w:'70%', bg:'#c8a96e', txt:'Good'},
+    {w:'88%', bg:'#a0c070', txt:'Strong'},
+    {w:'100%',bg:'#5ab870', txt:'Very Strong ✓'},
+  ];
+  const lvl = levels[Math.min(met, 5)];
+  fill.style.width = lvl.w; fill.style.background = lvl.bg;
+  lbl.style.color  = lvl.bg; lbl.textContent = lvl.txt;
+
+  const allCore = lmRules.upper(val) && lmRules.lower(val) && lmRules.digit(val) && lmRules.special(val) && lmRules.length(val);
+  if(allCore){
+    lmSetField(input, msg, true, 'Password meets all requirements ✓');
+    return true;
+  } else {
+    input.classList.add('invalid'); input.classList.remove('valid');
+    lmClearMsg('lmPwMsg');
+    return false;
+  }
+}
+
+// ── Eye toggle ──
+function lmToggleEye() {
+  const pw = document.getElementById('lmPassword');
+  const icon = document.getElementById('lmEyeIcon');
+  const show = pw.type==='text';
+  pw.type = show ? 'password' : 'text';
+  icon.innerHTML = show
+    ? `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`
+    : `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+}
+
+// ── Helpers ──
+function lmSetField(input, msgEl, ok, text) {
+  input.classList.toggle('valid',  ok);
+  input.classList.toggle('invalid', !ok);
+  msgEl.textContent = text;
+  msgEl.className = `lm-msg show ${ok?'ok':'err'}`;
+}
+function lmClearMsg(id) {
+  const el=document.getElementById(id);
+  el.textContent=''; el.className='lm-msg';
+}
+
+// ── Submit ──
+function lmSubmit(e) {
+  e.preventDefault();
+  const idOk = lmValidateIdent();
+  const pwOk = lmValidatePw();
+
+  if(!idOk || !pwOk) {
+    const inner = document.getElementById('lmFormContent');
+    inner.style.animation = 'lmShake .4s ease';
+    setTimeout(()=>inner.style.animation='', 400);
+    return;
+  }
+
+  const btn = document.getElementById('lmSubmitBtn');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    document.getElementById('lmFormContent').classList.add('hide');
+    document.getElementById('lmSuccess').classList.add('show');
+    showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Welcome back to Luxe!');
+    setTimeout(closeLoginModal, 2800);
+  }, 1600);
+}
+
+function socialSignIn(provider) {
+  showToast(`Redirecting to ${provider}…`);
+}
