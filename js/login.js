@@ -187,3 +187,183 @@ function lmSubmit(e) {
 function socialSignIn(provider) {
   showToast(`Redirecting to ${provider}…`);
 }
+
+// ===================== SIGNUP MODAL =====================
+function openSignupModal() {
+  document.getElementById('signupOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSignupModal() {
+  document.getElementById('signupOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    document.getElementById('signupForm').reset();
+    document.getElementById('suSuccess').classList.remove('show');
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('suBarWrap').style.display = 'none';
+    document.getElementById('suReqs').classList.remove('show');
+  }, 500);
+}
+document.getElementById('signupOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeSignupModal();
+});
+
+function toggleSignupPassword() {
+  const pw = document.getElementById('suPassword');
+  const icon = document.getElementById('suEyeIcon');
+  const show = pw.type === 'text';
+  pw.type = show ? 'password' : 'text';
+  icon.innerHTML = show
+    ? `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`
+    : `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+}
+
+function suValidatePw() {
+  const val = document.getElementById('suPassword').value;
+  const barWrap = document.getElementById('suBarWrap');
+  const fill = document.getElementById('suBarFill');
+  const lbl = document.getElementById('suBarLabel');
+  const reqs = document.getElementById('suReqs');
+
+  if (!val) {
+    barWrap.style.display = 'none';
+    reqs.classList.remove('show');
+    return false;
+  }
+
+  barWrap.style.display = 'block';
+  reqs.classList.add('show');
+
+  let met = 0;
+  const rules = {
+    upper: v => /[A-Z]/.test(v),
+    lower: v => /[a-z]/.test(v),
+    digit: v => /[0-9]/.test(v),
+    length: v => v.length >= 8,
+  };
+
+  Object.entries(rules).forEach(([key, fn]) => {
+    const pass = fn(val);
+    if (pass) met++;
+    const row = document.getElementById(`suR-${key}`);
+    const dot = document.getElementById(`suC-${key}`);
+    if (pass) { row.classList.add('met'); dot.textContent = '✓'; }
+    else { row.classList.remove('met'); dot.textContent = ''; }
+  });
+
+  const levels = [
+    {w: '25%', bg: '#e05555', txt: 'Weak'},
+    {w: '50%', bg: '#e0b855', txt: 'Fair'},
+    {w: '75%', bg: '#c8a96e', txt: 'Good'},
+    {w: '100%', bg: '#5ab870', txt: 'Strong'},
+  ];
+  const lvl = levels[Math.min(met - 1, 3)];
+  if (lvl) { fill.style.width = lvl.w; fill.style.background = lvl.bg; lbl.style.color = lvl.bg; lbl.textContent = lvl.txt; }
+
+  return met >= 3;
+}
+
+document.getElementById('suPassword').addEventListener('input', suValidatePw);
+
+function signupSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('suName').value.trim();
+  const email = document.getElementById('suEmail').value.trim();
+  const terms = document.getElementById('suTerms').checked;
+  const pwOk = suValidatePw();
+
+  if (!name || !email || !terms || !pwOk) {
+    showToast('Please fill all required fields correctly');
+    return;
+  }
+
+  const btn = document.getElementById('suSubmitBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('suSuccess').classList.add('show');
+    showToast('Welcome to Luxe! Your account has been created.');
+    setTimeout(closeSignupModal, 2500);
+  }, 1500);
+}
+
+function socialSignUp(provider) {
+  showToast(`Redirecting to ${provider}…`);
+}
+
+// ===================== ACCOUNT MODAL =====================
+function openAccountModal() {
+  document.getElementById('accountOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  checkLoginState();
+}
+function closeAccountModal() {
+  document.getElementById('accountOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('accountOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeAccountModal();
+});
+
+function checkLoginState() {
+  const user = JSON.parse(localStorage.getItem('luxe-user') || 'null');
+  const loggedIn = document.getElementById('accountLoggedIn');
+  const notLogged = document.getElementById('accountNotLogged');
+
+  if (user) {
+    loggedIn.classList.add('show');
+    notLogged.classList.remove('show');
+    document.getElementById('accName').textContent = user.name || 'Luxe User';
+    document.getElementById('accEmail').textContent = user.email || '';
+  } else {
+    loggedIn.classList.remove('show');
+    notLogged.classList.add('show');
+  }
+}
+
+function showAccountSection(section) {
+  showToast(`Opening ${section}…`);
+}
+
+function signOut() {
+  localStorage.removeItem('luxe-user');
+  showToast('You have been signed out');
+  closeAccountModal();
+}
+
+// Update login success to save user
+const originalLmSubmit = lmSubmit;
+lmSubmit = function(e) {
+  e.preventDefault();
+  const idOk = lmValidateIdent();
+  const pwOk = lmValidatePw();
+
+  if(!idOk || !pwOk) {
+    const inner = document.getElementById('lmFormContent');
+    inner.style.animation = 'lmShake .4s ease';
+    setTimeout(()=>inner.style.animation='', 400);
+    return;
+  }
+
+  const btn = document.getElementById('lmSubmitBtn');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  const ident = document.getElementById('lmIdent').value.trim();
+  const user = {
+    email: lmMode === 'email' ? ident : '',
+    phone: lmMode === 'phone' ? ident : '',
+    name: 'Luxe User'
+  };
+  localStorage.setItem('luxe-user', JSON.stringify(user));
+
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    document.getElementById('lmFormContent').classList.add('hide');
+    document.getElementById('lmSuccess').classList.add('show');
+    showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Welcome back to Luxe!');
+    setTimeout(closeLoginModal, 2800);
+  }, 1600);
+};

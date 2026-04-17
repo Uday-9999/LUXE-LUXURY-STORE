@@ -55,13 +55,41 @@ div class="cursor" id="cursor"></div>
 <nav id="navbar">
   <a href="#" class="nav-logo">Luxe</a>
   <ul class="nav-links">
-    <li><a href="#collections">Collections</a></li>
-    <li><a href="#products">Shop</a></li>
-    <li><a href="#">New In</a></li>
-    <li><a href="#">Sale</a></li>
+    <li class="nav-dropdown">
+      <a href="#products" class="drop-trigger">Men</a>
+      <div class="nav-dropdown-menu">
+        <a href="#" onclick="filterProducts('men')">New Arrivals</a>
+        <a href="#" onclick="filterProducts('men')">Tops & Shirts</a>
+        <a href="#" onclick="filterProducts('men')">Trousers</a>
+        <a href="#" onclick="filterProducts('men')">Footwear</a>
+        <a href="#" onclick="filterProducts('men')">Accessories</a>
+      </div>
+    </li>
+    <li class="nav-dropdown">
+      <a href="#products" class="drop-trigger">Women</a>
+      <div class="nav-dropdown-menu">
+        <a href="#" onclick="filterProducts('women')">New Arrivals</a>
+        <a href="#" onclick="filterProducts('women')">Dresses</a>
+        <a href="#" onclick="filterProducts('women')">Tops & Blouses</a>
+        <a href="#" onclick="filterProducts('women')">Bottoms</a>
+        <a href="#" onclick="filterProducts('women')">Footwear</a>
+      </div>
+    </li>
+    <li class="nav-dropdown">
+      <a href="#products" class="drop-trigger">Kids</a>
+      <div class="nav-dropdown-menu">
+        <a href="#" onclick="filterProducts('kids')">Boys</a>
+        <a href="#" onclick="filterProducts('kids')">Girls</a>
+        <a href="#" onclick="filterProducts('kids')">Baby</a>
+        <a href="#" onclick="filterProducts('kids')">Accessories</a>
+      </div>
+    </li>
+    <li><a href="#products" onclick="filterProducts('sale')">Sale</a></li>
   </ul>
   <div class="nav-actions">
-    <button class="btn-signin-nav" onclick="openLoginModal()">Sign In</button>
+    <button class="btn-icon account-btn" onclick="openAccountModal()" title="Account">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
     <button class="btn-icon" onclick="openSearch()" title="Search">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </button>
@@ -82,10 +110,11 @@ div class="cursor" id="cursor"></div>
 
 <!-- Mobile Nav -->
 <div class="mobile-nav" id="mobileNav">
-  <a href="#collections" onclick="toggleMobileNav()">Collections</a>
-  <a href="#products" onclick="toggleMobileNav()">Shop</a>
-  <a href="#" onclick="toggleMobileNav()">New In</a>
-  <a href="#" onclick="toggleMobileNav()">Sale</a>
+  <a href="#products" onclick="filterProducts('men'); toggleMobileNav()">Men</a>
+  <a href="#products" onclick="filterProducts('women'); toggleMobileNav()">Women</a>
+  <a href="#products" onclick="filterProducts('kids'); toggleMobileNav()">Kids</a>
+  <a href="#products" onclick="filterProducts('sale'); toggleMobileNav()">Sale</a>
+  <a href="#" onclick="openAccountModal(); toggleMobileNav()">My Account</a>
 </div>
 
 <!-- Hero -->
@@ -114,40 +143,40 @@ div class="cursor" id="cursor"></div>
     <h2 class="section-title">Shop by Collection</h2>
   </div>
   <div class="categories-grid reveal">
-    <div class="cat-card" onclick="filterProducts('fashion')">
-      <div class="cat-bg" style="background: linear-gradient(135deg,#1a1208,#2a1e0a)">👗</div>
+    <div class="cat-card" onclick="filterProducts('men')">
+      <div class="cat-bg" style="background: linear-gradient(135deg,#1a1a2e,#16213e)">👔</div>
       <div class="cat-gradient"></div>
       <div class="cat-arrow">→</div>
       <div class="cat-info">
-        <div class="cat-name">Fashion</div>
-        <div class="cat-count">42 pieces</div>
+        <div class="cat-name">Men</div>
+        <div class="cat-count">85 pieces</div>
       </div>
     </div>
-    <div class="cat-card" onclick="filterProducts('accessories')">
-      <div class="cat-bg" style="background: linear-gradient(135deg,#0d1a10,#0a1f12)">💎</div>
+    <div class="cat-card" onclick="filterProducts('women')">
+      <div class="cat-bg" style="background: linear-gradient(135deg,#2d1f3d,#1a1225)">👗</div>
       <div class="cat-gradient"></div>
       <div class="cat-arrow">→</div>
       <div class="cat-info">
-        <div class="cat-name">Accessories</div>
-        <div class="cat-count">28 pieces</div>
+        <div class="cat-name">Women</div>
+        <div class="cat-count">120 pieces</div>
       </div>
     </div>
-    <div class="cat-card" onclick="filterProducts('footwear')">
-      <div class="cat-bg" style="background: linear-gradient(135deg,#0f0f1a,#1a1022)">👟</div>
+    <div class="cat-card" onclick="filterProducts('kids')">
+      <div class="cat-bg" style="background: linear-gradient(135deg,#1a2f1a,#0f1f12)">🧸</div>
       <div class="cat-gradient"></div>
       <div class="cat-arrow">→</div>
       <div class="cat-info">
-        <div class="cat-name">Footwear</div>
-        <div class="cat-count">35 pieces</div>
+        <div class="cat-name">Kids</div>
+        <div class="cat-count">65 pieces</div>
       </div>
     </div>
-    <div class="cat-card" onclick="filterProducts('lifestyle')">
-      <div class="cat-bg" style="background: linear-gradient(135deg,#1a0a0a,#220e0e)">🕯️</div>
+    <div class="cat-card sale-card" onclick="filterProducts('sale')">
+      <div class="cat-bg" style="background: linear-gradient(135deg,#3d1f1f,#2a0f0f)">🔥</div>
       <div class="cat-gradient"></div>
       <div class="cat-arrow">→</div>
       <div class="cat-info">
-        <div class="cat-name">Lifestyle</div>
-        <div class="cat-count">19 pieces</div>
+        <div class="cat-name">Sale</div>
+        <div class="cat-count">Up to 70% off</div>
       </div>
     </div>
   </div>
@@ -161,10 +190,11 @@ div class="cursor" id="cursor"></div>
   </div>
   <div class="filters reveal" id="filterBtns">
     <button class="filter-btn active" onclick="filterProducts('all')">All</button>
-    <button class="filter-btn" onclick="filterProducts('fashion')">Fashion</button>
+    <button class="filter-btn" onclick="filterProducts('men')">Men</button>
+    <button class="filter-btn" onclick="filterProducts('women')">Women</button>
+    <button class="filter-btn" onclick="filterProducts('kids')">Kids</button>
     <button class="filter-btn" onclick="filterProducts('accessories')">Accessories</button>
-    <button class="filter-btn" onclick="filterProducts('footwear')">Footwear</button>
-    <button class="filter-btn" onclick="filterProducts('lifestyle')">Lifestyle</button>
+    <button class="filter-btn sale-filter" onclick="filterProducts('sale')">Sale</button>
   </div>
   <div class="products-grid reveal" id="productsGrid"></div>
 </section>
@@ -328,7 +358,7 @@ div class="cursor" id="cursor"></div>
         </form>
 
         <div class="lm-signup">
-          New to Luxe? <a href="#">Create your account →</a>
+          New to Luxe? <a href="#" onclick="closeLoginModal(); openSignupModal(); return false;">Create your account →</a>
         </div>
       </div><!-- /lm-form-content -->
 
@@ -340,6 +370,168 @@ div class="cursor" id="cursor"></div>
       </div>
 
     </div><!-- /modal-inner -->
+  </div>
+</div>
+
+<!-- ==================== SIGNUP MODAL ==================== -->
+<div class="login-modal-overlay" id="signupOverlay">
+  <div class="login-modal" id="signupModal">
+    <div class="modal-gold-bar"></div>
+    <div class="modal-inner">
+      <button class="modal-close" onclick="closeSignupModal()">✕</button>
+
+      <span class="modal-logo">Luxe</span>
+      <h2 class="modal-title">Create Account</h2>
+      <p class="modal-sub">Join Luxe for exclusive access to new arrivals, sales, and more.</p>
+
+      <div class="lm-socials">
+        <button class="lm-social" onclick="socialSignUp('Google')">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google
+        </button>
+        <button class="lm-social" onclick="socialSignUp('Apple')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </button>
+      </div>
+
+      <div class="lm-divider">or sign up with</div>
+
+      <form id="signupForm" novalidate onsubmit="signupSubmit(event)">
+        <div class="lm-group">
+          <label class="lm-label">Full Name</label>
+          <div class="lm-input-wrap">
+            <span class="lm-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input class="lm-input" type="text" id="suName" placeholder="John Doe" autocomplete="name">
+          </div>
+        </div>
+
+        <div class="lm-group">
+          <label class="lm-label">Email Address</label>
+          <div class="lm-input-wrap">
+            <span class="lm-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+            </span>
+            <input class="lm-input" type="email" id="suEmail" placeholder="you@example.com" autocomplete="email">
+          </div>
+        </div>
+
+        <div class="lm-group">
+          <label class="lm-label">Password</label>
+          <div class="lm-input-wrap">
+            <span class="lm-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+            <input class="lm-input" type="password" id="suPassword" placeholder="Create a strong password" autocomplete="new-password">
+            <button type="button" class="lm-eye" onclick="toggleSignupPassword()">
+              <svg id="suEyeIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="pw-bar-wrap" id="suBarWrap">
+            <div class="pw-bar-track"><div class="pw-bar-fill" id="suBarFill"></div></div>
+            <div class="pw-bar-label" id="suBarLabel"></div>
+          </div>
+          <div class="pw-reqs" id="suReqs">
+            <div class="req" id="suR-upper"><div class="req-circle" id="suC-upper"></div>Uppercase</div>
+            <div class="req" id="suR-lower"><div class="req-circle" id="suC-lower"></div>Lowercase</div>
+            <div class="req" id="suR-digit"><div class="req-circle" id="suC-digit"></div>Digit</div>
+            <div class="req" id="suR-length"><div class="req-circle" id="suC-length"></div>Min 8 chars</div>
+          </div>
+        </div>
+
+        <div class="lm-group">
+          <label class="lm-label">Phone (Optional)</label>
+          <div class="lm-input-wrap">
+            <span class="lm-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a2 2 0 011.99-1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.91 14.91a16 16 0 006.63 6.63l.27-.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            </span>
+            <input class="lm-input phone-pad" type="tel" id="suPhone" placeholder="+91 98765 43210" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="lm-options">
+          <label class="lm-remember">
+            <input type="checkbox" id="suTerms">
+            <div class="lm-checkbox"></div>
+            <span class="lm-remember-label">I agree to <a href="#">Terms</a> & <a href="#">Privacy Policy</a></span>
+          </label>
+        </div>
+
+        <button type="submit" class="lm-submit" id="suSubmitBtn">
+          <span class="lm-btn-text">Create Account</span>
+          <span class="lm-btn-loader"><div class="lm-spinner"></div></span>
+        </button>
+      </form>
+
+      <div class="lm-signup">
+        Already have an account? <a href="#" onclick="closeSignupModal(); openLoginModal(); return false;">Sign in →</a>
+      </div>
+
+      <div class="lm-success" id="suSuccess">
+        <div class="lm-success-ring">✦</div>
+        <div class="lm-success-title">Welcome to Luxe!</div>
+        <p class="lm-success-msg">Your account has been created. Start shopping!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ACCOUNT MODAL ==================== -->
+<div class="login-modal-overlay" id="accountOverlay">
+  <div class="login-modal account-modal" id="accountModal">
+    <div class="modal-gold-bar"></div>
+    <div class="modal-inner">
+      <button class="modal-close" onclick="closeAccountModal()">✕</button>
+
+      <div class="account-logged-in" id="accountLoggedIn">
+        <div class="account-header">
+          <div class="account-avatar">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="account-user-info">
+            <h3 class="account-name" id="accName">Guest User</h3>
+            <p class="account-email" id="accEmail">Not signed in</p>
+          </div>
+        </div>
+
+        <div class="account-menu">
+          <a href="#" class="account-menu-item" onclick="showAccountSection('profile')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            My Profile
+          </a>
+          <a href="#" class="account-menu-item" onclick="showAccountSection('orders')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            My Orders
+          </a>
+          <a href="#" class="account-menu-item" onclick="showAccountSection('wishlist')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            Wishlist
+          </a>
+          <a href="#" class="account-menu-item" onclick="showAccountSection('addresses')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Addresses
+          </a>
+          <a href="#" class="account-menu-item" onclick="showAccountSection('settings')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+          </a>
+        </div>
+
+        <button class="lm-submit" onclick="signOut()">Sign Out</button>
+      </div>
+
+      <div class="account-not-logged" id="accountNotLogged">
+        <span class="modal-logo">Luxe</span>
+        <h2 class="modal-title">My Account</h2>
+        <p class="modal-sub">Sign in to view your profile, orders, and more.</p>
+        <button class="lm-submit" onclick="closeAccountModal(); openLoginModal();">Sign In</button>
+        <div class="lm-signup">
+          New to Luxe? <a href="#" onclick="closeAccountModal(); openSignupModal(); return false;">Create an account →</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

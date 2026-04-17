@@ -197,6 +197,12 @@
   [data-theme="light"] .mobile-nav {
     background: rgba(250,249,247,0.98);
   }
+  [data-theme="light"] .mobile-nav a {
+    color: var(--text);
+  }
+  [data-theme="light"] .mobile-nav a:hover {
+    color: var(--accent);
+  }
   .mobile-nav.open { transform: translateX(0); }
   .mobile-nav a {
     font-family: 'Playfair Display', serif;
@@ -1215,4 +1221,168 @@
     .products-grid { grid-template-columns: 1fr; }
     .hero-actions { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-outline { text-align: center; }
+  }
+
+  /* ===================== NAV DROPDOWN ===================== */
+  .nav-dropdown {
+    position: relative;
+  }
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 0;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s, transform .3s;
+    z-index: 1001;
+  }
+  .nav-dropdown:hover .nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+  .nav-dropdown-menu a {
+    display: block;
+    padding: 10px 20px;
+    font-size: .82rem;
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .nav-dropdown-menu a:hover {
+    color: var(--accent);
+    background: var(--surface2);
+  }
+
+  /* ===================== SALE FILTER ===================== */
+  .sale-filter {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .sale-filter:hover, .sale-filter.active {
+    background: #ff6b6b;
+    border-color: #ff6b6b;
+    color: #fff;
+  }
+  .cat-card.sale-card .cat-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: var(--red);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  /* ===================== ACCOUNT MODAL ===================== */
+  .account-modal {
+    max-width: 400px;
+  }
+  .account-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .account-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+  .account-avatar svg {
+    width: 28px;
+    height: 28px;
+  }
+  .account-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+  }
+  .account-email {
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  .account-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .account-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 4px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: background .2s, color .2s;
+  }
+  .account-menu-item:hover {
+    background: var(--border);
+    color: var(--accent);
+  }
+  .account-menu-item svg {
+    width: 20px;
+    height: 20px;
+    color: var(--muted);
+  }
+  .account-menu-item:hover svg {
+    color: var(--accent);
+  }
+  .account-logged-in, .account-not-logged {
+    display: none;
+  }
+  .account-logged-in.show, .account-not-logged.show {
+    display: block;
+  }
+  .account-not-logged .modal-title {
+    margin-bottom: 8px;
+  }
+  .account-not-logged .lm-submit {
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  /* ===================== ACCOUNT BUTTON ===================== */
+  .account-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ===================== LIGHT THEME OVERRIDES ===================== */
+  [data-theme="light"] .nav-dropdown-menu {
+    background: var(--surface);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  }
+  [data-theme="light"] .account-menu-item {
+    background: var(--surface2);
+  }
+  [data-theme="light"] .account-menu-item:hover {
+    background: var(--border);
+  }
+  [data-theme="light"] .account-avatar {
+    background: var(--surface2);
   }
