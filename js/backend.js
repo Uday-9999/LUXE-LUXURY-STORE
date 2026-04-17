@@ -1,19 +1,17 @@
-const SUPABASE_URL  = 'https://jbubyhkksxydrgempdqz.supabase.co';
+const SUPABASE_URL = 'https://jbubyhkksxydrgempdqz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpidWJ5aGtrc3h5ZHJnZW1wZHF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxMDQ0MTQsImV4cCI6MjA4NzY4MDQxNH0.mSawRej1vCYsakTC1S7raTG8zfJe-Faqg02asCFpqDg';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ===================== AUTH STATE =====================
+
 let currentUser = null;
 let authTab = 'signin';
 
-// Restore session on page load
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) setLoggedIn(session.user);
 })();
 
-// Listen for auth state changes
 sb.auth.onAuthStateChange((_event, session) => {
   if (session?.user) setLoggedIn(session.user);
   else setLoggedOut();
@@ -21,15 +19,15 @@ sb.auth.onAuthStateChange((_event, session) => {
 
 function setLoggedIn(user) {
   currentUser = user;
-  const email    = user.email || '';
-  const name     = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0] || 'User';
-  const initials = name.slice(0,2).toUpperCase();
-  document.getElementById('navSignInBtn').style.display  = 'none';
+  const email = user.email || '';
+  const name = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0] || 'User';
+  const initials = name.slice(0, 2).toUpperCase();
+  document.getElementById('navSignInBtn').style.display = 'none';
   document.getElementById('navUser').classList.add('visible');
-  document.getElementById('navAvatar').textContent       = initials;
-  document.getElementById('navUserName').textContent     = name.split(' ')[0];
-  document.getElementById('dropdownName').textContent    = name;
-  document.getElementById('dropdownEmail').textContent   = email;
+  document.getElementById('navAvatar').textContent = initials;
+  document.getElementById('navUserName').textContent = name.split(' ')[0];
+  document.getElementById('dropdownName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = email;
 }
 
 function setLoggedOut() {
