@@ -9,7 +9,7 @@ function renderProducts(filter = 'all') {
     const stars = '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating);
     card.innerHTML = `
       <div class="product-img-wrap">
-        <span class="product-img-emoji">${p.emoji}</span>
+        <img class="product-img" src="${p.image}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="product-img-fallback" style="display:none">${p.name.charAt(0)}</div>
         ${p.badge ? `<div class="product-badge${p.badge==='Sale'?' sale':''}">${p.badge}</div>` : ''}
         <div class="product-actions-overlay">
           <button class="btn-add-cart" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Add to Cart</button>
