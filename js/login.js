@@ -1,3 +1,54 @@
+// ═══════════════════════════════════════════
+//  API Configuration
+// ═══════════════════════════════════════════
+const API_BASE = 'http://localhost:3000/api';
+
+// ═══════════════════════════════════════════
+//  Auth Helper Functions
+// ═══════════════════════════════════════════
+function saveAuth(token, user) {
+  localStorage.setItem('luxe-token', token);
+  localStorage.setItem('luxe-user', JSON.stringify(user));
+}
+
+function getToken() {
+  return localStorage.getItem('luxe-token');
+}
+
+function getUser() {
+  return JSON.parse(localStorage.getItem('luxe-user') || 'null');
+}
+
+function clearAuth() {
+  localStorage.removeItem('luxe-token');
+  localStorage.removeItem('luxe-user');
+}
+
+// Check auth state on page load
+(async function initAuth() {
+  const token = getToken();
+  if (!token) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('luxe-user', JSON.stringify(data.user));
+    } else {
+      // Token expired or invalid
+      clearAuth();
+    }
+  } catch (err) {
+    // Server not reachable, keep local data
+    console.log('Auth check: server not reachable');
+  }
+})();
+
+// ═══════════════════════════════════════════
+//  LOGIN MODAL
+// ═══════════════════════════════════════════
 function openLoginModal() {
   document.getElementById('loginOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -20,6 +71,9 @@ function closeLoginModal() {
       const el = document.getElementById(id);
       if(el) { el.textContent=''; el.className='lm-msg'; }
     });
+    // Clear any error messages
+    const errEl = document.getElementById('lmErrorMsg');
+    if(errEl) errEl.remove();
     lmSwitchMode('email');
   }, 500);
 }
@@ -159,8 +213,25 @@ function lmClearMsg(id) {
   el.textContent=''; el.className='lm-msg';
 }
 
-// ── Submit ──
-function lmSubmit(e) {
+function showAuthError(formContentId, message) {
+  // Remove existing error
+  const existing = document.getElementById('lmErrorMsg');
+  if(existing) existing.remove();
+  
+  const errorDiv = document.createElement('div');
+  errorDiv.id = 'lmErrorMsg';
+  errorDiv.style.cssText = 'background: rgba(224,85,85,0.12); border: 1px solid rgba(224,85,85,0.3); color: #e05555; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px; text-align: center; animation: lmShake .4s ease;';
+  errorDiv.textContent = message;
+  
+  const formContent = document.getElementById(formContentId);
+  formContent.insertBefore(errorDiv, formContent.firstChild);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => { if(errorDiv.parentNode) errorDiv.remove(); }, 5000);
+}
+
+// ── Submit (LOGIN) ──
+async function lmSubmit(e) {
   e.preventDefault();
   const idOk = lmValidateIdent();
   const pwOk = lmValidatePw();
@@ -175,20 +246,45 @@ function lmSubmit(e) {
   const btn = document.getElementById('lmSubmitBtn');
   btn.classList.add('loading'); btn.disabled = true;
 
-  setTimeout(()=>{
+  const identifier = document.getElementById('lmIdent').value.trim();
+  const password = document.getElementById('lmPassword').value;
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      btn.classList.remove('loading'); btn.disabled = false;
+      showAuthError('lmFormContent', data.error || 'Login failed. Please try again.');
+      return;
+    }
+
+    // Success — save auth data
+    saveAuth(data.token, data.user);
+
     btn.classList.remove('loading');
     document.getElementById('lmFormContent').classList.add('hide');
     document.getElementById('lmSuccess').classList.add('show');
-    showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Welcome back to Luxe!');
+    showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Welcome back, ' + data.user.name + '!');
     setTimeout(closeLoginModal, 2800);
-  }, 1600);
+  } catch (err) {
+    btn.classList.remove('loading'); btn.disabled = false;
+    showAuthError('lmFormContent', 'Cannot connect to server. Please make sure the server is running.');
+  }
 }
 
 function socialSignIn(provider) {
-  showToast(`Redirecting to ${provider}…`);
+  showToast(`${provider} sign-in coming soon!`);
 }
 
-// ===================== SIGNUP MODAL =====================
+// ═══════════════════════════════════════════
+//  SIGNUP MODAL
+// ═══════════════════════════════════════════
 function openSignupModal() {
   document.getElementById('signupOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -202,6 +298,8 @@ function closeSignupModal() {
     document.getElementById('signupForm').style.display = 'block';
     document.getElementById('suBarWrap').style.display = 'none';
     document.getElementById('suReqs').classList.remove('show');
+    const errEl = document.getElementById('lmErrorMsg');
+    if(errEl) errEl.remove();
   }, 500);
 }
 document.getElementById('signupOverlay').addEventListener('click', function(e){
@@ -265,10 +363,13 @@ function suValidatePw() {
 
 document.getElementById('suPassword').addEventListener('input', suValidatePw);
 
-function signupSubmit(e) {
+// ── Submit (SIGNUP) ──
+async function signupSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('suName').value.trim();
   const email = document.getElementById('suEmail').value.trim();
+  const password = document.getElementById('suPassword').value;
+  const phone = document.getElementById('suPhone') ? document.getElementById('suPhone').value.trim() : '';
   const terms = document.getElementById('suTerms').checked;
   const pwOk = suValidatePw();
 
@@ -281,20 +382,42 @@ function signupSubmit(e) {
   btn.classList.add('loading');
   btn.disabled = true;
 
-  setTimeout(() => {
+  try {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      btn.classList.remove('loading'); btn.disabled = false;
+      showAuthError('signupForm', data.error || 'Registration failed. Please try again.');
+      return;
+    }
+
+    // Success — save auth data
+    saveAuth(data.token, data.user);
+
     btn.classList.remove('loading');
     document.getElementById('signupForm').style.display = 'none';
     document.getElementById('suSuccess').classList.add('show');
-    showToast('Welcome to Luxe! Your account has been created.');
+    showToast('Welcome to Luxe, ' + data.user.name + '! Your account has been created.');
     setTimeout(closeSignupModal, 2500);
-  }, 1500);
+  } catch (err) {
+    btn.classList.remove('loading'); btn.disabled = false;
+    showAuthError('signupForm', 'Cannot connect to server. Please make sure the server is running.');
+  }
 }
 
 function socialSignUp(provider) {
-  showToast(`Redirecting to ${provider}…`);
+  showToast(`${provider} sign-up coming soon!`);
 }
 
-// ===================== ACCOUNT MODAL =====================
+// ═══════════════════════════════════════════
+//  ACCOUNT MODAL
+// ═══════════════════════════════════════════
 function openAccountModal() {
   document.getElementById('accountOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -309,11 +432,11 @@ document.getElementById('accountOverlay').addEventListener('click', function(e){
 });
 
 function checkLoginState() {
-  const user = JSON.parse(localStorage.getItem('luxe-user') || 'null');
+  const user = getUser();
   const loggedIn = document.getElementById('accountLoggedIn');
   const notLogged = document.getElementById('accountNotLogged');
 
-  if (user) {
+  if (user && getToken()) {
     loggedIn.classList.add('show');
     notLogged.classList.remove('show');
     document.getElementById('accName').textContent = user.name || 'Luxe User';
@@ -329,41 +452,7 @@ function showAccountSection(section) {
 }
 
 function signOut() {
-  localStorage.removeItem('luxe-user');
+  clearAuth();
   showToast('You have been signed out');
   closeAccountModal();
 }
-
-// Update login success to save user
-const originalLmSubmit = lmSubmit;
-lmSubmit = function(e) {
-  e.preventDefault();
-  const idOk = lmValidateIdent();
-  const pwOk = lmValidatePw();
-
-  if(!idOk || !pwOk) {
-    const inner = document.getElementById('lmFormContent');
-    inner.style.animation = 'lmShake .4s ease';
-    setTimeout(()=>inner.style.animation='', 400);
-    return;
-  }
-
-  const btn = document.getElementById('lmSubmitBtn');
-  btn.classList.add('loading'); btn.disabled = true;
-
-  const ident = document.getElementById('lmIdent').value.trim();
-  const user = {
-    email: lmMode === 'email' ? ident : '',
-    phone: lmMode === 'phone' ? ident : '',
-    name: 'Luxe User'
-  };
-  localStorage.setItem('luxe-user', JSON.stringify(user));
-
-  setTimeout(()=>{
-    btn.classList.remove('loading');
-    document.getElementById('lmFormContent').classList.add('hide');
-    document.getElementById('lmSuccess').classList.add('show');
-    showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Welcome back to Luxe!');
-    setTimeout(closeLoginModal, 2800);
-  }, 1600);
-};

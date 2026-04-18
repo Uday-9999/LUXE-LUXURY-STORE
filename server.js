@@ -2,19 +2,46 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-
 const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
 
+// ─── MongoDB Connection ───
 mongoose.connect(MONGO_URI)
-  .then(() => { console.log('Connected to MongoDB'); return 'connected'; })
-  .catch(err => { console.error('MongoDB connection error:', err); return 'error'; });
+  .then(() => { console.log('Connected to MongoDB'); })
+  .catch(err => { console.error('MongoDB connection error:', err); });
 
+// ─── User Schema ───
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  phone: { type: String, default: '' },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+// ─── Product Schema ───
 const productSchema = new mongoose.Schema({
   id: Number,
   name: String,
@@ -29,6 +56,7 @@ const productSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', productSchema);
 
+// ─── Order Schema ───
 const orderSchema = new mongoose.Schema({
   userId: String,
   userEmail: String,
@@ -39,6 +67,133 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Order = mongoose.model('Order', orderSchema);
+
+// ─── JWT Helper ───
+function generateToken(user) {
+  return jwt.sign(
+    { id: user._id, email: user.email, name: user.name },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+}
+
+// ─── Auth Middleware ───
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
+
+// ═══════════════════════════════════════════
+//  AUTH ROUTES
+// ═══════════════════════════════════════════
+
+// Register
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+
+    // Create user
+    const user = new User({ name, email: email.toLowerCase(), phone: phone || '', password });
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user);
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email, phone: user.phone }
+    });
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+
+    if (!identifier || !password) {
+      return res.status(400).json({ error: 'Email/phone and password are required' });
+    }
+
+    // Find user by email or phone
+    const isEmail = identifier.includes('@');
+    const query = isEmail
+      ? { email: identifier.toLowerCase() }
+      : { phone: identifier.replace(/\D/g, '') };
+
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(401).json({ error: isEmail ? 'No account found with this email' : 'No account found with this phone number' });
+    }
+
+    // Verify password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+    }
+
+    // Generate token
+    const token = generateToken(user);
+
+    res.json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email, phone: user.phone }
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// Get current user (protected)
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({
+      success: true,
+      user: { id: user._id, name: user.name, email: user.email, phone: user.phone }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════
+//  PRODUCT ROUTES
+// ═══════════════════════════════════════════
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Luxe API is running' });
@@ -79,15 +234,26 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.post('/api/orders', async (req, res) => {
+// ═══════════════════════════════════════════
+//  ORDER ROUTES (protected)
+// ═══════════════════════════════════════════
+
+app.post('/api/orders', authMiddleware, async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const order = new Order({
+      ...req.body,
+      userId: req.user.id,
+      userEmail: req.user.email
+    });
     await order.save();
     res.status(201).json({ success: true, orderId: order._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Serve static files (for frontend)
+app.use(express.static('.'));
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
