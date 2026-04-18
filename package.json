@@ -1,0 +1,27 @@
+{
+  "name": "luxe-store",
+  "version": "1.0.0",
+  "description": "LUXE is a modern luxury e-commerce frontend built using **HTML, CSS, and JavaScript**.  \r It features a premium UI design, smooth animations, dynamic cart system, and responsive layout.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Uday-9999/LUXE-LUXURY-STORE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Uday-9999/LUXE-LUXURY-STORE/issues"
+  },
+  "homepage": "https://github.com/Uday-9999/LUXE-LUXURY-STORE#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.4.1"
+  }
+}
