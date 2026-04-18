@@ -2,7 +2,7 @@
   "name": "luxe-store",
   "version": "1.0.0",
   "description": "LUXE is a modern luxury e-commerce frontend built using **HTML, CSS, and JavaScript**.  \r It features a premium UI design, smooth animations, dynamic cart system, and responsive layout.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
