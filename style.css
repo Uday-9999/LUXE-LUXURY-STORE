@@ -40,24 +40,7 @@
     overflow-x: hidden;
   }
 
-  /* ===================== CURSOR ===================== */
-  .cursor {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    position: fixed; pointer-events: none; z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: width .2s, height .2s, background .2s;
-  }
-  .cursor-follower {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: 1.5px solid var(--accent);
-    position: fixed; pointer-events: none; z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: transform .12s ease, opacity .2s;
-    opacity: 0.5;
-  }
+  
 
   /* ===================== NAV ===================== */
   nav {
