@@ -210,7 +210,39 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.find();
+    const { 
+      category, 
+      minPrice, 
+      maxPrice, 
+      badge, 
+      minRating,
+      sort = '-createdAt',
+      page = 1,
+      limit = 20,
+      search
+    } = req.query;
+
+    const query = {};
+
+    if (category) query.category = category;
+    if (badge) query.badge = badge;
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    if (minRating) query.rating = { $gte: Number(minRating) };
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const total = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(Number(limit));
+
     if (products.length === 0) {
       const defaultProducts = [
         { id: 1, name: 'Tailored Wool Blazer', category: 'men', price: 485, oldPrice: 620, image: 'Assests/Blazer.jpg', badge: 'Sale', rating: 5, variant: 'Navy / M' },
@@ -235,9 +267,15 @@ app.get('/api/products', async (req, res) => {
         { id: 20, name: 'Silk Scarf', category: 'sale', price: 95, oldPrice: 150, image: 'Assests/Scraf.jfif', badge: '-35%', rating: 5, variant: 'Burgundy' }
       ];
       await Product.insertMany(defaultProducts);
-      return res.json(defaultProducts);
+      return res.json({
+        products: defaultProducts,
+        pagination: { total: defaultProducts.length, page: 1, limit, pages: 1 }
+      });
     }
-    res.json(products);
+    res.json({
+      products,
+      pagination: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / limit) }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,3 +1,16 @@
+const CART_KEY = 'luxe_cart';
+let cart = [];
+
+function loadCart() {
+  const saved = localStorage.getItem(CART_KEY);
+  if (saved) {
+    try { cart = JSON.parse(saved); } catch { cart = []; }
+  }
+}
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
 function openCart() {
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('cartOverlay').classList.add('open');
@@ -16,6 +29,7 @@ function addToCart(product) {
   } else {
     cart.push({ ...product, qty: 1 });
   }
+  saveCart();
   renderCart();
   updateCartBadge();
   showToast(`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${product.name} added to cart`);
@@ -24,6 +38,7 @@ function addToCart(product) {
 
 function removeFromCart(id) {
   cart = cart.filter(i => i.id !== id);
+  saveCart();
   renderCart();
   updateCartBadge();
 }
@@ -33,7 +48,7 @@ function changeQty(id, delta) {
   if (!item) return;
   item.qty += delta;
   if (item.qty < 1) removeFromCart(id);
-  else { renderCart(); updateCartBadge(); }
+  else { saveCart(); renderCart(); updateCartBadge(); }
 }
 
 function renderCart() {
@@ -87,10 +102,36 @@ function updateCartBadge() {
   badge.classList.toggle('visible', total > 0);
 }
 
-function checkout() {
-  showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Order placed successfully! 🎉');
-  cart = [];
-  renderCart();
-  updateCartBadge();
-  closeCart();
+async function checkout() {
+  const token = localStorage.getItem('luxe-token');
+  if (!token) {
+    showToast('Please login to place an order');
+    openLoginModal();
+    return;
+  }
+
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ items: cart, subtotal: total, total })
+    });
+
+    if (res.ok) {
+      showToast('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Order placed successfully! 🎉');
+      cart = [];
+      saveCart();
+      renderCart();
+      updateCartBadge();
+      closeCart();
+    } else {
+      showToast('Failed to place order. Please try again.');
+    }
+  } catch (err) {
+    showToast('Error placing order. Please try again.');
+  }
 }
