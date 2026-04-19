@@ -8,6 +8,10 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -99,9 +103,11 @@ function authMiddleware(req, res, next) {
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
+  console.log('Register request received:', req.body);
   try {
     const { name, email, phone, password } = req.body;
 
+    console.log('Validation check');
     // Validation
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required' });
@@ -112,14 +118,17 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     // Check if email already exists
+    console.log('Checking existing user');
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
 
     // Create user
+    console.log('Creating user');
     const user = new User({ name, email: email.toLowerCase(), phone: phone || '', password });
     await user.save();
+    console.log('User saved successfully');
 
     // Generate token
     const token = generateToken(user);
@@ -131,7 +140,7 @@ app.post('/api/auth/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ error: 'Server error. Please try again.' });
+    res.status(500).json({ error: err.message || 'Server error. Please try again.' });
   }
 });
 
